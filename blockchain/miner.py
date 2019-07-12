@@ -26,15 +26,17 @@ def proof_of_work(last_proof):
 
     print("Searching for next proof")
     print('last proof: ', last_proof)
-    proof = int(time.time())
-    while valid_proof(last_proof, str(proof)) is False:
+    # proof = int(time.time())
+    proof = 3424
+    while valid_proof(last_proof, proof) is False:
         time_now = time.time()
-        if time_now - start > 10:
+        if time_now - start > 30:
             print('restarting...')
             return
-        proof *= 897
+        proof += 1
 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
+
     return proof
 
 
@@ -47,10 +49,12 @@ def valid_proof(last_hash, proof):
     """
 
     #: Your code here!
-    guess = f'{last_hash}{proof}'.encode()
-    guess_hashed = hashlib.sha256(guess).hexdigest()
+    guess = f'{proof}'.encode()
+    hashed_p_prime = hashlib.sha256(guess).hexdigest()
 
-    return guess_hashed[-6:] == str(proof)[:6]
+    prev_proof = f'{last_hash}'.encode()
+    hashed_p = hashlib.sha256(prev_proof).hexdigest()
+    return hashed_p_prime[:6] == hashed_p[-6:]
 
 
 if __name__ == '__main__':
@@ -80,6 +84,8 @@ if __name__ == '__main__':
         r = requests.get(url=node + "/last_proof")
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
+
+        print('attempting to submit...')
 
         post_data = {"proof": new_proof,
                      "id": id}
