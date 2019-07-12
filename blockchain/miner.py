@@ -4,10 +4,13 @@ import requests
 import sys
 
 from uuid import uuid4
+import time
 
 from timeit import default_timer as timer
 
 import random
+
+# Find a number p' such that the last six digits of hash(p) are equal to the first six digits of hash(p') - IE: last_hash: ...999123456, new hash 123456888... - p is the previous proof, and p' is the new proof
 
 
 def proof_of_work(last_proof):
@@ -19,11 +22,17 @@ def proof_of_work(last_proof):
     - p is the previous proof, and p' is the new proof
     """
 
-    start = timer()
+    start = time.time()
 
     print("Searching for next proof")
-    proof = 0
-    #  TODO: Your code here
+    print('last proof: ', last_proof)
+    proof = int(time.time())
+    while valid_proof(last_proof, str(proof)) is False:
+        time_now = time.time()
+        if time_now - start > 10:
+            print('restarting...')
+            return
+        proof *= 897
 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
     return proof
@@ -37,8 +46,11 @@ def valid_proof(last_hash, proof):
     IE:  last_hash: ...999123456, new hash 123456888...
     """
 
-    # TODO: Your code here!
-    pass
+    #: Your code here!
+    guess = f'{last_hash}{proof}'.encode()
+    guess_hashed = hashlib.sha256(guess).hexdigest()
+
+    return guess_hashed[-6:] == str(proof)[:6]
 
 
 if __name__ == '__main__':
@@ -79,3 +91,4 @@ if __name__ == '__main__':
             print("Total coins mined: " + str(coins_mined))
         else:
             print(data.get('message'))
+            print("Total coins mined: " + str(coins_mined))
