@@ -27,11 +27,10 @@ def proof_of_work(last_proof):
     print("Searching for next proof")
     print('last proof: ', last_proof)
     # proof = int(time.time())
-    proof = 3424
+    proof = 43524354326624
     while valid_proof(last_proof, proof) is False:
         time_now = time.time()
-        if time_now - start > 30:
-            print('restarting...')
+        if time_now - start > 5:
             return
         proof += 1
 
@@ -85,7 +84,9 @@ if __name__ == '__main__':
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
 
-        print('attempting to submit...')
+        if not new_proof:
+            continue
+        print('attempting to submit')
 
         post_data = {"proof": new_proof,
                      "id": id}
