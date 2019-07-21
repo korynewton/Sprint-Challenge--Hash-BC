@@ -4,10 +4,13 @@ import requests
 import sys
 
 from uuid import uuid4
+import time
 
 from timeit import default_timer as timer
 
 import random
+
+# Find a number p' such that the last six digits of hash(p) are equal to the first six digits of hash(p') - IE: last_hash: ...999123456, new hash 123456888... - p is the previous proof, and p' is the new proof
 
 
 def proof_of_work(last_proof):
@@ -19,13 +22,20 @@ def proof_of_work(last_proof):
     - p is the previous proof, and p' is the new proof
     """
 
-    start = timer()
+    start = time.time()
 
     print("Searching for next proof")
-    proof = 0
-    #  TODO: Your code here
+    print('last proof: ', last_proof)
+    # proof = int(time.time())
+    proof = 43524354326624
+    while valid_proof(last_proof, proof) is False:
+        time_now = time.time()
+        if time_now - start > 5:
+            return
+        proof += 1
 
     print("Proof found: " + str(proof) + " in " + str(timer() - start))
+
     return proof
 
 
@@ -37,8 +47,13 @@ def valid_proof(last_hash, proof):
     IE:  last_hash: ...999123456, new hash 123456888...
     """
 
-    # TODO: Your code here!
-    pass
+    #: Your code here!
+    guess = f'{proof}'.encode()
+    hashed_p_prime = hashlib.sha256(guess).hexdigest()
+
+    prev_proof = f'{last_hash}'.encode()
+    hashed_p = hashlib.sha256(prev_proof).hexdigest()
+    return hashed_p_prime[:6] == hashed_p[-6:]
 
 
 if __name__ == '__main__':
@@ -69,6 +84,10 @@ if __name__ == '__main__':
         data = r.json()
         new_proof = proof_of_work(data.get('proof'))
 
+        if not new_proof:
+            continue
+        print('attempting to submit')
+
         post_data = {"proof": new_proof,
                      "id": id}
 
@@ -79,3 +98,4 @@ if __name__ == '__main__':
             print("Total coins mined: " + str(coins_mined))
         else:
             print(data.get('message'))
+            print("Total coins mined: " + str(coins_mined))
